@@ -1,0 +1,51 @@
+{
+    "data_file_path": "../case_study_dataset_202509152039.csv",
+    "output_directory": "output",
+    "validation": {
+        "imo": true,
+        "mmsi": true,
+        "coordinates": true,
+        "timestamps": true
+    },
+    "entity_resolution": {
+        "high_confidence": 0.9,
+        "review_required": 0.6,
+        "low_confidence": 0.3,
+        "attribute_weights": {
+            "imo": 0.30,
+            "name": 0.20,
+            "mmsi": 0.10,
+            "length": 0.10,
+            "width": 0.08,
+            "built_year": 0.08,
+            "ship_builder": 0.07,
+            "vessel_type": 0.07
+        }
+    },
+    "knowledge_graph": {
+        "enabled": true,
+        "temporal_history": true,
+        "canonical_entities": true
+    },
+    "neo4j": {
+        "uri": "bolt://localhost:7687",
+        "user": "neo4j",
+        "password_env": "NEO4J_PASSWORD",
+        "database": "neo4j"
+    },
+    "hitl": {
+        "require_review": true,
+        "auto_approve_high_confidence": true,
+        "review_queue_limit": 100
+    },
+    "llm": {
+        "model": "gpt-4o",
+        "temperature": 0.0,
+        "max_tokens": 4096
+    },
+    "hallucination_prevention": {
+        "strict_grounding": true,
+        "evidence_required": true,
+        "no_fabrication": true
+    }
+}
