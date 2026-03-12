@@ -9,6 +9,9 @@ from pathlib import Path
 print("=" * 70)
 print("🚀 Starting API handler initialization...")
 print("=" * 70)
+print(f"Working directory: {Path.cwd()}")
+print(f"Python version: {sys.version}")
+print(f"Project root: {Path(__file__).parent.parent}")
 
 # Try to import Mangum for serverless adaptation
 try:

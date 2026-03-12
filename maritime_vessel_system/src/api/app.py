@@ -133,16 +133,24 @@ app = FastAPI(
     version="2.0.0",
 )
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+try:
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+    print("✅ CORS middleware added")
+except Exception as e:
+    print(f"⚠️  Failed to add CORS middleware: {e}")
 
-# Include dedicated Knowledge Graph router
-app.include_router(kg_router)
+try:
+    # Include dedicated Knowledge Graph router
+    app.include_router(kg_router)
+    print("✅ Knowledge Graph router included")
+except Exception as e:
+    print(f"⚠️  Failed to include KG router: {e}")
 
 
 def _get_neo4j():
