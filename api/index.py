@@ -5,6 +5,15 @@ Routes all /api/* requests to the FastAPI application
 import sys
 import traceback
 from pathlib import Path
+
+# Try to import Mangum for serverless adaptation
+try:
+    from mangum import Mangum
+    MANGUM_AVAILABLE = True
+except ImportError:
+    MANGUM_AVAILABLE = False
+    print("⚠️  Mangum not installed - serverless runtime may fail")
+
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 
@@ -51,6 +60,16 @@ async def health():
             "message": str(e)
         }
 
+# Wrap with Mangum for Vercel serverless runtime
+if MANGUM_AVAILABLE:
+    handler = Mangum(app, lifespan="off")
+    print("✅ Wrapped app with Mangum for serverless runtime")
+else:
+    # Fallback - just use the app directly (less likely to work on Vercel)
+    handler = app
+    print("⚠️  Using app directly without Mangum wrapper")
+
 # Export for Vercel
-__all__ = ['app']
+__all__ = ['app', 'handler']
+
 

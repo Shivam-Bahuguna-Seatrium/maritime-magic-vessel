@@ -3,17 +3,19 @@
   "outputDirectory": "maritime_vessel_system/frontend/dist",
   "trailingSlash": false,
   "cleanUrls": true,
+  "rewrites": [
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/index.py"
+    }
+  ],
   "routes": [
     {
       "src": "/api/(.*)",
       "dest": "/api/index.py"
     },
     {
-      "src": "/assets/(.*)",
-      "dest": "/assets/$1"
-    },
-    {
-      "src": "/(?!api|assets)(.*)$",
+      "src": "^/(?!api)[^.]*$",
       "dest": "/index.html"
     }
   ]
