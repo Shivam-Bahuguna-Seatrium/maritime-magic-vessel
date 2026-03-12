@@ -1,6 +1,6 @@
 {
-  "buildCommand": "cd frontend && npm install && npm run build",
-  "outputDirectory": "frontend/dist",
+  "buildCommand": "cd maritime_vessel_system/frontend && npm install && npm run build",
+  "outputDirectory": "maritime_vessel_system/frontend/dist",
   "functions": {
     "api/**/*.py": {
       "runtime": "python3.11"
@@ -12,7 +12,7 @@
       "dest": "/api/index"
     },
     {
-      "src": "^/.*",
+      "src": "^/(?!api).*",
       "dest": "/index.html"
     }
   ],
