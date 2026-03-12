@@ -131,39 +131,15 @@ async def exception_handler(request, exc):
         }
     )
 
-# Create the Mangum handler with error wrapper
+# Create the Mangum handler
 if MANGUM_AVAILABLE:
-    # Create Mangum handler with lifespan disabled for serverless
-    _mangum_handler = Mangum(app, lifespan="off")
-    
-    # Wrap the handler to catch and log errors
-    def handler(event, context):
-        """Wrapped handler with error logging"""
-        try:
-            path = event.get('rawPath', event.get('path', 'UNKNOWN'))
-            method = event.get('requestContext', {}).get('http', {}).get('method', 'UNKNOWN')
-            print(f"📨 Request: {method} {path}")
-            result = _mangum_handler(event, context)
-            status = result.get('statusCode', 'UNKNOWN') if isinstance(result, dict) else '200'
-            print(f"📤 Response: {status}")
-            return result
-        except Exception as e:
-            print(f"❌ Handler error: {e}")
-            print(f"📋 Traceback: {traceback.format_exc()}")
-            return {
-                "statusCode": 500,
-                "headers": {"Content-Type": "application/json"},
-                "body": json.dumps({
-                    "error": "Internal Server Error",
-                    "message": str(e),
-                    "type": type(e).__name__
-                })
-            }
-    
-    print("✅ Wrapped app with Mangum handler (with error wrapper)")
+    # Mangum can be used directly as the handler
+    # It will be called by Vercel with (event, context) arguments
+    handler = Mangum(app, lifespan="off")
+    print("✅ Using Mangum handler directly")
 else:
     # Fallback handler without Mangum
-    def handler(event, context):
+    async def handler(event, context):
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
