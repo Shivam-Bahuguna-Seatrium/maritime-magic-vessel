@@ -134,21 +134,65 @@ async def exception_handler(request, exc):
         }
     )
 
-# Create the Mangum handler
+# Create the handler
 if MANGUM_AVAILABLE:
-    # Mangum can be used directly as the handler
-    # It will be called by Vercel with (event, context) arguments
-    handler = Mangum(app, lifespan="off")
-    print("✅ Using Mangum handler directly")
+    try:
+        # Create the Mangum ASGI adapter
+        app_asgi = Mangum(app, lifespan="off")
+        
+        # Create a wrapper that logs and handles errors
+        def handler(event, context):
+            """
+            Vercel handler that wraps the ASGI app.
+            Vercel passes an HTTP Lambda-like event to this handler.
+            """
+            try:
+                method = event.get('requestContext', {}).get('http', {}).get('method', 'UNKNOWN')
+                path = event.get('rawPath', event.get('path', 'UNKNOWN'))
+                print(f"📨 Request: {method} {path}")
+                
+                # Call the ASGI app
+                response = app_asgi(event, context)
+                
+                status = response.get('statusCode', 'UNKNOWN')
+                print(f"📤 Response: {status}")
+                return response
+                
+            except Exception as e:
+                print(f"❌ Handler error: {type(e).__name__}: {e}")
+                print(traceback.format_exc())
+                
+                # Return error response
+                return {
+                    "statusCode": 500,
+                    "headers": {"Content-Type": "application/json"},
+                    "body": json.dumps({
+                        "error": "Internal Server Error",
+                        "message": str(e),
+                        "type": type(e).__name__
+                    })
+                }
+        
+        print("✅ Mangum handler created successfully")
+        
+    except Exception as e:
+        print(f"❌ Failed to create Mangum handler: {e}")
+        print(traceback.format_exc())
+        def handler(event, context):
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({"error": f"Handler creation failed: {str(e)}"})
+            }
 else:
     # Fallback handler without Mangum
-    async def handler(event, context):
+    print("⚠️  Mangum not available")
+    def handler(event, context):
         return {
             "statusCode": 500,
             "headers": {"Content-Type": "application/json"},
             "body": json.dumps({"error": "Mangum not available"})
         }
-    print("⚠️  Mangum not available - using fallback handler")
 
 print("=" * 70)
 print("🎯 API module loaded successfully") 
