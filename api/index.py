@@ -43,21 +43,40 @@ except Exception as e:
 # Create fallback app if import failed
 if app is None:
     print("⚠️  Creating minimal fallback FastAPI app")
+    import json as json_module
     app = FastAPI(title="Maritime API - Fallback Mode")
+    
+    error_msg = f"App import failed: {str(import_error)}" if import_error else "Unknown error"
+    error_details = {
+        "status": "error",
+        "message": error_msg,
+        "type": type(import_error).__name__ if import_error else "Unknown",
+    }
+    
+    # Create fallback endpoints that handle errors gracefully
+    @app.get("/api/status")
+    async def fallback_status():
+        return {"status": "fallback", "error": error_msg}
     
     @app.get("/api/health")
     async def fallback_health():
-        return {
-            "status": "fallback",
-            "error": f"Failed to import main app: {str(import_error)}",
-        }
+        return {"status": "fallback", "error": error_msg}
     
-    @app.get("/api/status")
-    async def fallback_status():
-        return {
-            "status": "fallback",
-            "error": f"Failed to import main app: {str(import_error)}",
-        }
+    @app.get("/health")
+    async def root_health():
+        return {"status": "fallback"}
+    
+    @app.post("/api/upload")
+    async def fallback_upload():
+        return {"error": "App not initialized", "status": "fallback"}
+    
+    @app.get("/api/load-default")
+    async def fallback_load_default():
+        return {"error": "App not initialized", "status": "fallback"}
+    
+    @app.get("/")
+    async def fallback_root():
+        return {"error": "Application not initialized. " + error_msg}
 
 # Add health check endpoint to all apps
 @app.get("/api/health-check")
@@ -68,6 +87,23 @@ async def health_check():
         "message": "API handler is running",
         "mangum_available": MANGUM_AVAILABLE
     }
+
+# Add exception handlers to ensure JSON responses
+@app.exception_handler(Exception)
+async def exception_handler(request, exc):
+    """Catch all exceptions and return JSON"""
+    print(f"❌ Exception in app: {exc}")
+    print(f"📋 Type: {type(exc).__name__}")
+    print(f"📋 Traceback: {traceback.format_exc()}")
+    from fastapi.responses import JSONResponse
+    return JSONResponse(
+        status_code=500,
+        content={
+            "error": "Internal Server Error",
+            "message": str(exc),
+            "type": type(exc).__name__,
+        }
+    )
 
 # Create the Mangum handler with error wrapper
 if MANGUM_AVAILABLE:
