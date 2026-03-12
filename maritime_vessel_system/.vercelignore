@@ -1,0 +1,11 @@
+src/
+maritime_vessel_identity.egg-info/
+.venv/
+__pycache__/
+*.pyc
+requirements.txt
+test_backend.py
+inspect_data.py
+inspect_kg.py
+.git/
+.gitignore
