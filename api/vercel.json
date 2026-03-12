@@ -1,19 +1,16 @@
 {
-  "name": "maritime-vessel-backend",
+  "name": "maritime-vessel-api",
   "version": 2,
+  "buildCommand": "echo 'Backend ready'",
   "env": {
-    "PYTHON_VERSION": "3.12"
+    "PYTHON_VERSION": "3.12",
+    "DEPLOYMENT_TYPE": {"value": "backend"}
   },
-  "builds": [
-    {
-      "src": "index.py",
-      "use": "@vercel/python",
-      "config": {
-        "maxLambdaSize": "50mb",
-        "runtime": "python3.12"
-      }
+  "functions": {
+    "index.py": {
+      "maxDuration": 30
     }
-  ],
+  },
   "routes": [
     {
       "src": "/(.*)",
@@ -22,3 +19,4 @@
     }
   ]
 }
+
