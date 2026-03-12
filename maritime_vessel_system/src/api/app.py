@@ -35,16 +35,51 @@ _SRC = str(Path(__file__).resolve().parent.parent)
 if _SRC not in sys.path:
     sys.path.insert(0, _SRC)
 
-from validation.validation_pipeline import (
-    DataValidationPipeline,
-)
-from knowledge_graph.ontology import (
-    build_ontology_tree,
-    get_category_for_type,
-    VESSEL_TYPE_HIERARCHY,
-)
-from api.neo4j_client import Neo4jClient, InMemoryGraphDB
-from api.kg_router import router as kg_router, set_graph_state
+# Import validation pipeline
+try:
+    from validation.validation_pipeline import DataValidationPipeline
+except ImportError as e:
+    print(f"⚠️  Could not import DataValidationPipeline: {e}")
+    DataValidationPipeline = None
+
+# Import knowledge graph components
+try:
+    from knowledge_graph.ontology import (
+        build_ontology_tree,
+        get_category_for_type,
+        VESSEL_TYPE_HIERARCHY,
+    )
+except ImportError as e:
+    print(f"⚠️  Could not import ontology: {e}")
+    build_ontology_tree = None
+    get_category_for_type = None
+    VESSEL_TYPE_HIERARCHY = None
+
+# Import Neo4j clients
+try:
+    from api.neo4j_client import Neo4jClient, InMemoryGraphDB
+except ImportError as e:
+    print(f"⚠️  Could not import Neo4j clients: {e}")
+    # Create stub classes for fallback
+    class Neo4jClient:
+        def __init__(self, *args, **kwargs):
+            raise RuntimeError(f"Neo4jClient not available: {e}")
+    
+    class InMemoryGraphDB:
+        def initialize(self):
+            pass
+    
+    InMemoryGraphDB = InMemoryGraphDB
+
+# Import KG router
+try:
+    from api.kg_router import router as kg_router, set_graph_state
+except ImportError as e:
+    print(f"⚠️  Could not import kg_router: {e}")
+    from fastapi import APIRouter
+    kg_router = APIRouter()
+    def set_graph_state(*args, **kwargs):
+        pass
 
 # Optional: OpenAI Agent SDK chat
 try:
