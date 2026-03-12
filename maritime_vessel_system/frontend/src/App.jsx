@@ -1,9 +1,10 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import Dashboard from './components/Dashboard';
 import GraphViewer from './components/GraphViewer';
 import ChatPanel from './components/ChatPanel';
 import FilterPanel from './components/FilterPanel';
 import CaseStudy from './components/CaseStudy';
+import DEBUG from './debug';
 
 const TABS = ['Dashboard', 'Knowledge Graph', 'Chat', 'Case Study'];
 
@@ -17,11 +18,28 @@ export default function App() {
     graph_built: false,
   });
 
+  // Log app initialization
+  useEffect(() => {
+    DEBUG.log('APP', '🚀 App initialized');
+    DEBUG.log('APP', `Environment: ${window.location.hostname}:${window.location.port}`);
+    DEBUG.log('APP', `API Base URL: ${window.location.origin}`);
+  }, []);
+
   const refreshStatus = useCallback(async () => {
     try {
+      DEBUG.api('GET', '/api/status');
       const res = await fetch('/api/status');
-      if (res.ok) setStatus(await res.json());
-    } catch { /* ignore */ }
+      DEBUG.apiResponse('GET', '/api/status', res.status, { ok: res.ok });
+      if (res.ok) {
+        const data = await res.json();
+        setStatus(data);
+        DEBUG.info('APP', 'Status refreshed', data);
+      } else {
+        DEBUG.warn('APP', `Status endpoint returned ${res.status}`);
+      }
+    } catch (err) {
+      DEBUG.apiError('GET', '/api/status', err);
+    }
   }, []);
 
   return (
