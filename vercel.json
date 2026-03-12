@@ -1,13 +1,19 @@
 {
   "buildCommand": "cd maritime_vessel_system/frontend && npm install && npm run build",
   "outputDirectory": "maritime_vessel_system/frontend/dist",
+  "trailingSlash": false,
+  "cleanUrls": true,
   "routes": [
     {
-      "src": "^/api/.*",
+      "src": "/api/(.*)",
       "dest": "/api/index.py"
     },
     {
-      "src": "^/(?!api).*",
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1"
+    },
+    {
+      "src": "/(?!api|assets)(.*)$",
       "dest": "/index.html"
     }
   ]
