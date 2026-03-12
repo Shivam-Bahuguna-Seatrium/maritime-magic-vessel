@@ -189,10 +189,14 @@ async def load_dataset(path: str):
 async def load_default_dataset():
     """Auto-load the default case study dataset."""
     try:
-        # Try to find the CSV file in parent directory
+        # Try to find the CSV file in various possible locations
+        # Works in both local and Vercel deployments
         possible_paths = [
+            # Local development
             Path(__file__).resolve().parent.parent.parent / "case_study_dataset_202509152039.csv",
             Path(__file__).resolve().parent.parent.parent.parent / "case_study_dataset_202509152039.csv",
+            # Vercel deployment (in api folder)
+            Path(__file__).resolve().parent.parent.parent.parent / "api" / "case_study_dataset_202509152039.csv",
         ]
         
         csv_path = None
