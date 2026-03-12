@@ -1,12 +1,7 @@
 {
   "name": "maritime-vessel-frontend",
   "version": 2,
-  "buildCommand": "npm install && npm run build",
   "outputDirectory": "dist",
-  "env": {
-    "DEPLOYMENT_TYPE": {"value": "frontend"}
-  },
-  "envTargets": ["production"],
   "routes": [
     {
       "src": "/assets/(.*)",

@@ -1,14 +1,9 @@
 {
-  "name": "maritime-vessel-api",
   "version": 2,
-  "buildCommand": "echo 'Backend ready'",
-  "env": {
-    "PYTHON_VERSION": "3.12",
-    "DEPLOYMENT_TYPE": {"value": "backend"}
-  },
   "functions": {
     "index.py": {
-      "maxDuration": 30
+      "maxDuration": 30,
+      "memory": 1024
     }
   },
   "routes": [
@@ -19,4 +14,5 @@
     }
   ]
 }
+
 
