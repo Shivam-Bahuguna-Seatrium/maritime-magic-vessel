@@ -1,18 +1,20 @@
 {
   "buildCommand": "cd maritime_vessel_system/frontend && npm install && npm run build",
   "outputDirectory": "maritime_vessel_system/frontend/dist",
-  "trailingSlash": false,
-  "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/index.py"
+  "functions": {
+    "api/index.py": {
+      "runtime": "python@3.11"
     }
-  ],
+  },
   "routes": [
     {
       "src": "/api/(.*)",
-      "dest": "/api/index.py"
+      "dest": "api/index.py",
+      "methods": ["GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"]
+    },
+    {
+      "src": "/health-check",
+      "dest": "api/index.py"
     },
     {
       "src": "^/(?!api)[^.]*$",
