@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import DEBUG from '../debug';
 
 /**
  * FilterPanel – hierarchical dropdown filters for the Knowledge Graph.
@@ -24,10 +25,15 @@ export default function FilterPanel({ graphBuilt, filters, onChange }) {
 
   useEffect(() => {
     if (!graphBuilt) return;
+    DEBUG.log('FILTERPANEL', 'Loading filters...');
+    DEBUG.api('GET', '/api/kg/filters');
     fetch('/api/kg/filters')
-      .then(r => r.json())
+      .then(r => {
+        DEBUG.apiResponse('GET', '/api/kg/filters', r.status);
+        return r.json();
+      })
       .then(data => {
-        console.log('[FilterPanel] API response:', data);
+        DEBUG.info('FILTERPANEL', 'Filters API response received', data);
         const newOptions = {
           categories: data.categories || [],
           vessel_types: data.vessel_types || [],
@@ -36,7 +42,7 @@ export default function FilterPanel({ graphBuilt, filters, onChange }) {
           validation_statuses: data.validation_statuses || [],
           vessel_count: data.vessel_count || 0,
         };
-        console.log('[FilterPanel] Processed options:', newOptions);
+        DEBUG.log('FILTERPANEL', `Processed ${newOptions.categories.length} categories, ${newOptions.vessel_types.length} types`, newOptions);
         setAllOptions(newOptions);
         setFilteredOptions({
           categories: newOptions.categories,
@@ -47,7 +53,7 @@ export default function FilterPanel({ graphBuilt, filters, onChange }) {
         });
       })
       .catch((err) => {
-        console.error('[FilterPanel] Error fetching filters:', err);
+        DEBUG.apiError('GET', '/api/kg/filters', err);
       });
   }, [graphBuilt]);
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import DEBUG from '../debug';
 
 /**
  * Dashboard – main landing page.
@@ -89,18 +90,27 @@ export default function Dashboard({ status, refreshStatus }) {
   // ---- Auto-load default CSV ----
   const loadDefaultCSV = async () => {
     try {
+      DEBUG.log('DASHBOARD', 'Loading default CSV...');
       // Try to load the default case study dataset
+      DEBUG.api('GET', '/api/load-default');
       const response = await fetch('/api/load-default');
+      DEBUG.apiResponse('GET', '/api/load-default', response.status);
+      
       if (response.ok) {
         const data = await response.json();
+        DEBUG.info('DASHBOARD', 'Default CSV loaded successfully', data);
         setDefaultFileName('case_study_dataset_202509152039.csv');
         setMessage(`📁 Auto-loaded: ${data.records} records with ${data.columns.length} columns.`);
         refreshStatus();
       } else {
         // If auto-load fails, show upload prompt
+        DEBUG.warn('DASHBOARD', `Load-default returned ${response.status}`);
+        const errorText = await response.text();
+        DEBUG.error('DASHBOARD', 'Server response', errorText);
         setMessage('Upload a CSV file to get started.');
       }
     } catch (e) {
+      DEBUG.apiError('GET', '/api/load-default', e);
       setMessage('Upload a CSV file to get started.');
     }
   };

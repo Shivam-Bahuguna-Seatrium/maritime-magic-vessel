@@ -1,4 +1,5 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
+import DEBUG from '../debug';
 
 /**
  * GraphViewer – renders the Neo4j knowledge graph using @neo4j-nvl/react.
@@ -39,21 +40,29 @@ export default function GraphViewer({ filters, graphBuilt }) {
   // Fetch vessel count when graph is built
   useEffect(() => {
     if (!graphBuilt) return;
+    DEBUG.log('GRAPHVIEWER', 'Fetching vessel count...');
+    DEBUG.api('GET', '/api/kg/filters');
     fetch('/api/kg/filters')
-      .then(r => r.json())
+      .then(r => {
+        DEBUG.apiResponse('GET', '/api/kg/filters', r.status);
+        return r.json();
+      })
       .then(data => {
-        console.log('Filters API response:', data);
+        DEBUG.info('GRAPHVIEWER', 'Filters API response received', data);
         const count = data.vessel_count || data.vessel_names?.length || 0;
-        console.log('Setting vessel count to:', count);
+        DEBUG.log('GRAPHVIEWER', `Setting vessel count to: ${count}`);
         setVesselCount(count);
       })
-      .catch(err => console.error('Error fetching vessel count:', err));
+      .catch(err => {
+        DEBUG.apiError('GET', '/api/kg/filters', err);
+      });
   }, [graphBuilt]);
 
   // Fetch graph data whenever filters change
   const fetchGraph = useCallback(async () => {
     if (!graphBuilt) return;
     setLoading(true);
+    DEBUG.log('GRAPHVIEWER', 'Fetching graph data with filters', filters);
     try {
       const params = new URLSearchParams();
       
@@ -68,11 +77,15 @@ export default function GraphViewer({ filters, graphBuilt }) {
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
       
       // Use new dedicated knowledge graph router
-      const res = await fetch(`/api/kg/data?${params}`, { signal: controller.signal });
+      const url = `/api/kg/data?${params}`;
+      DEBUG.api('GET', url);
+      const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);
+      DEBUG.apiResponse('GET', url, res.status);
       
       if (res.ok) {
         let data = await res.json();
+        DEBUG.info('GRAPHVIEWER', `Received ${data.nodes?.length} nodes and ${data.relationships?.length} relationships`);
         
         // Frontend-side limiting if too many nodes
         if (data.nodes && data.nodes.length > dataLimit) {
@@ -86,19 +99,19 @@ export default function GraphViewer({ filters, graphBuilt }) {
             nodes: [...limitedVessels, ...others.slice(0, 100)],
             relationships: limitedRels,
           };
-          console.log(`Limited to ${limitedVessels.length} vessels`);
+          DEBUG.log('GRAPHVIEWER', `Limited to ${limitedVessels.length} vessels`);
         }
         
         setGraphData(data || { nodes: [], relationships: [] });
       } else {
-        console.error('Graph fetch error:', res.status, res.statusText);
+        DEBUG.error('GRAPHVIEWER', `Graph fetch error: ${res.status} ${res.statusText}`);
         setGraphData({ nodes: [], relationships: [] });
       }
     } catch (err) {
       if (err.name === 'AbortError') {
-        console.error('Graph fetch timeout - try adjusting filters');
+        DEBUG.warn('GRAPHVIEWER', 'Graph fetch timeout - try adjusting filters');
       } else {
-        console.error('Error fetching graph:', err);
+        DEBUG.apiError('GET', '/api/kg/data', err);
       }
       setGraphData({ nodes: [], relationships: [] });
     }
