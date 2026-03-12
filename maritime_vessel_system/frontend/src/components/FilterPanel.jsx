@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import DEBUG from '../debug';
+import { API_BASE_URL } from '../api';
 
 /**
  * FilterPanel – hierarchical dropdown filters for the Knowledge Graph.
@@ -26,10 +27,10 @@ export default function FilterPanel({ graphBuilt, filters, onChange }) {
   useEffect(() => {
     if (!graphBuilt) return;
     DEBUG.log('FILTERPANEL', 'Loading filters...');
-    DEBUG.api('GET', '/api/kg/filters');
-    fetch('/api/kg/filters')
+    DEBUG.api('GET', `${API_BASE_URL}/api/kg/filters`);
+    fetch(`${API_BASE_URL}/api/kg/filters`)
       .then(r => {
-        DEBUG.apiResponse('GET', '/api/kg/filters', r.status);
+        DEBUG.apiResponse('GET', `${API_BASE_URL}/api/kg/filters`, r.status);
         return r.json();
       })
       .then(data => {
@@ -77,7 +78,7 @@ export default function FilterPanel({ graphBuilt, filters, onChange }) {
         
         // If we have any filters, fetch available options for next level
         if (params.toString()) {
-          const res = await fetch(`/api/kg/filter-options?${params}`);
+          const res = await fetch(`${API_BASE_URL}/api/kg/filter-options?${params}`);
           if (res.ok) {
             const data = await res.json();
             console.log('[FilterPanel] Filtered options from backend:', data);

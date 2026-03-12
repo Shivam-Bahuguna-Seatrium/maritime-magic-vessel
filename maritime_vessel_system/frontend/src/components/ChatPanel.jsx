@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import ResultsTable from './ResultsTable';
+import { API_BASE_URL } from '../api';
 
 /**
  * ChatPanel – conversational interface that:
@@ -100,7 +101,7 @@ export default function ChatPanel({ graphBuilt }) {
 
     try {
       // First try predefined endpoint (no OpenAI required)
-      const res = await fetch('/api/chat/predefined', {
+      const res = await fetch(`${API_BASE_URL}/api/chat/predefined`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg }),
@@ -137,7 +138,7 @@ export default function ChatPanel({ graphBuilt }) {
 
     try {
       // Use predefined endpoint
-      const res = await fetch('/api/chat/predefined', {
+      const res = await fetch(`${API_BASE_URL}/api/chat/predefined`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ message: msg }),

@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import DEBUG from '../debug';
+import { API_BASE_URL } from '../api';
 
 /**
  * GraphViewer – renders the Neo4j knowledge graph using @neo4j-nvl/react.
@@ -41,10 +42,10 @@ export default function GraphViewer({ filters, graphBuilt }) {
   useEffect(() => {
     if (!graphBuilt) return;
     DEBUG.log('GRAPHVIEWER', 'Fetching vessel count...');
-    DEBUG.api('GET', '/api/kg/filters');
-    fetch('/api/kg/filters')
+    DEBUG.api('GET', `${API_BASE_URL}/api/kg/filters`);
+    fetch(`${API_BASE_URL}/api/kg/filters`)
       .then(r => {
-        DEBUG.apiResponse('GET', '/api/kg/filters', r.status);
+        DEBUG.apiResponse('GET', `${API_BASE_URL}/api/kg/filters`, r.status);
         return r.json();
       })
       .then(data => {
@@ -77,7 +78,7 @@ export default function GraphViewer({ filters, graphBuilt }) {
       const timeoutId = setTimeout(() => controller.abort(), 15000); // 15s timeout
       
       // Use new dedicated knowledge graph router
-      const url = `/api/kg/data?${params}`;
+      const url = `${API_BASE_URL}/api/kg/data?${params}`;
       DEBUG.api('GET', url);
       const res = await fetch(url, { signal: controller.signal });
       clearTimeout(timeoutId);

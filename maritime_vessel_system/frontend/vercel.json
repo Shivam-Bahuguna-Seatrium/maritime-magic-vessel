@@ -1,0 +1,23 @@
+{
+  "name": "maritime-vessel-frontend",
+  "version": 2,
+  "buildCommand": "npm install && npm run build",
+  "outputDirectory": "dist",
+  "env": {
+    "VITE_API_URL": "@vite_api_url"
+  },
+  "envTargets": ["production"],
+  "routes": [
+    {
+      "src": "/assets/(.*)",
+      "dest": "/assets/$1",
+      "headers": {
+        "Cache-Control": "public, max-age=31536000, immutable"
+      }
+    },
+    {
+      "src": "^/(?!assets)[^.]*$",
+      "dest": "/index.html"
+    }
+  ]
+}

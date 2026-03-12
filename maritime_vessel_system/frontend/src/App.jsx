@@ -8,6 +8,9 @@ import DEBUG from './debug';
 
 const TABS = ['Dashboard', 'Knowledge Graph', 'Chat', 'Case Study'];
 
+// Get API base URL from environment or default to relative path
+const DEFAULT_API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+
 export default function App() {
   const [tab, setTab] = useState('Dashboard');
   const [graphFilters, setGraphFilters] = useState({});
@@ -22,14 +25,14 @@ export default function App() {
   useEffect(() => {
     DEBUG.log('APP', '🚀 App initialized');
     DEBUG.log('APP', `Environment: ${window.location.hostname}:${window.location.port}`);
-    DEBUG.log('APP', `API Base URL: ${window.location.origin}`);
+    DEBUG.log('APP', `API Base URL: ${DEFAULT_API_URL}`);
   }, []);
 
   const refreshStatus = useCallback(async () => {
     try {
-      DEBUG.api('GET', '/api/status');
-      const res = await fetch('/api/status');
-      DEBUG.apiResponse('GET', '/api/status', res.status, { ok: res.ok });
+      DEBUG.api('GET', `${DEFAULT_API_URL}/api/status`);
+      const res = await fetch(`${DEFAULT_API_URL}/api/status`);
+      DEBUG.apiResponse('GET', `${DEFAULT_API_URL}/api/status`, res.status, { ok: res.ok });
       if (res.ok) {
         const data = await res.json();
         setStatus(data);
@@ -38,7 +41,7 @@ export default function App() {
         DEBUG.warn('APP', `Status endpoint returned ${res.status}`);
       }
     } catch (err) {
-      DEBUG.apiError('GET', '/api/status', err);
+      DEBUG.apiError('GET', `${DEFAULT_API_URL}/api/status`, err);
     }
   }, []);
 

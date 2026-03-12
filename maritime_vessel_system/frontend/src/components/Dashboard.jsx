@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import DEBUG from '../debug';
+import { API_BASE_URL, apiFormData } from '../api';
 
 /**
  * Dashboard – main landing page.
@@ -92,9 +93,9 @@ export default function Dashboard({ status, refreshStatus }) {
     try {
       DEBUG.log('DASHBOARD', 'Loading default CSV...');
       // Try to load the default case study dataset
-      DEBUG.api('GET', '/api/load-default');
-      const response = await fetch('/api/load-default');
-      DEBUG.apiResponse('GET', '/api/load-default', response.status);
+      DEBUG.api('GET', `${API_BASE_URL}/api/load-default`);
+      const response = await fetch(`${API_BASE_URL}/api/load-default`);
+      DEBUG.apiResponse('GET', `${API_BASE_URL}/api/load-default`, response.status);
       
       if (response.ok) {
         const data = await response.json();
@@ -110,7 +111,7 @@ export default function Dashboard({ status, refreshStatus }) {
         setMessage('Upload a CSV file to get started.');
       }
     } catch (e) {
-      DEBUG.apiError('GET', '/api/load-default', e);
+      DEBUG.apiError('GET', `${API_BASE_URL}/api/load-default`, e);
       setMessage('Upload a CSV file to get started.');
     }
   };
@@ -141,7 +142,7 @@ export default function Dashboard({ status, refreshStatus }) {
     try {
       const form = new FormData();
       form.append('file', file);
-      const res = await fetch('/api/upload', { method: 'POST', body: form });
+      const res = await fetch(`${API_BASE_URL}/api/upload`, { method: 'POST', body: form });
       const data = await res.json();
       if (res.ok) {
         setMessage(`✅ Loaded ${data.records} records with ${data.columns.length} columns.`);
@@ -163,7 +164,7 @@ export default function Dashboard({ status, refreshStatus }) {
     setLoading('analyze');
     setMessage('');
     try {
-      const res = await fetch('/api/analyze', { method: 'POST' });
+      const res = await fetch(`${API_BASE_URL}/api/analyze`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         setAnalysisResult(data);
@@ -182,7 +183,7 @@ export default function Dashboard({ status, refreshStatus }) {
     setLoading('validate');
     setMessage('');
     try {
-      const res = await fetch('/api/validate', { method: 'POST' });
+      const res = await fetch(`${API_BASE_URL}/api/validate`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         setValidationResult(data);
@@ -202,7 +203,7 @@ export default function Dashboard({ status, refreshStatus }) {
     setLoading('graph');
     setMessage('');
     try {
-      const res = await fetch('/api/build-graph', { method: 'POST' });
+      const res = await fetch(`${API_BASE_URL}/api/build-graph`, { method: 'POST' });
       const data = await res.json();
       if (res.ok) {
         setGraphResult(data);
