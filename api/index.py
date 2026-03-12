@@ -2,6 +2,7 @@
 Vercel Python serverless function entry point for FastAPI with Mangum
 """
 import sys
+import json
 import traceback
 from pathlib import Path
 
@@ -68,17 +69,48 @@ async def health_check():
         "mangum_available": MANGUM_AVAILABLE
     }
 
-# Create the Mangum handler
+# Create the Mangum handler with error wrapper
 if MANGUM_AVAILABLE:
-    handler = Mangum(app)
-    print("✅ Wrapped app with Mangum handler")
+    # Create Mangum handler with lifespan disabled for serverless
+    _mangum_handler = Mangum(app, lifespan="off")
+    
+    # Wrap the handler to catch and log errors
+    def handler(event, context):
+        """Wrapped handler with error logging"""
+        try:
+            path = event.get('rawPath', event.get('path', 'UNKNOWN'))
+            method = event.get('requestContext', {}).get('http', {}).get('method', 'UNKNOWN')
+            print(f"📨 Request: {method} {path}")
+            result = _mangum_handler(event, context)
+            status = result.get('statusCode', 'UNKNOWN') if isinstance(result, dict) else '200'
+            print(f"📤 Response: {status}")
+            return result
+        except Exception as e:
+            print(f"❌ Handler error: {e}")
+            print(f"📋 Traceback: {traceback.format_exc()}")
+            return {
+                "statusCode": 500,
+                "headers": {"Content-Type": "application/json"},
+                "body": json.dumps({
+                    "error": "Internal Server Error",
+                    "message": str(e),
+                    "type": type(e).__name__
+                })
+            }
+    
+    print("✅ Wrapped app with Mangum handler (with error wrapper)")
 else:
-    # Direct app as handler won't work on Vercel but allows local testing
-    handler = app
-    print("⚠️  Using app directly as handler (may fail on Vercel)")
+    # Fallback handler without Mangum
+    def handler(event, context):
+        return {
+            "statusCode": 500,
+            "headers": {"Content-Type": "application/json"},
+            "body": json.dumps({"error": "Mangum not available"})
+        }
+    print("⚠️  Mangum not available - using fallback handler")
 
 print("=" * 70)
-print("🎯 API module loaded successfully")
+print("🎯 API module loaded successfully") 
 print("=" * 70)
 
 # Export for Vercel
